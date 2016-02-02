@@ -2,8 +2,9 @@
 
 from sqlalchemy import func
 from model import User
-# from model import Rating
-# from model import Movie
+from model import Rating
+from model import Movie
+from datetime import datetime
 
 from model import connect_to_db, db
 from server import app
@@ -37,10 +38,60 @@ def load_users():
 def load_movies():
     """Load movies from u.item into database."""
 
+    print "Movies"
+
+    # Delete all rows in table, so if we need to run this a second time,
+    # we won't be trying to add duplicate users
+    Movie.query.delete()
+
+    # Read u.item file and insert data
+    for row in open("seed_data/u.item"):
+        row = row.rstrip()
+        movie_info = row.split("|")
+        movie_id, title, released_string, blank, imdb_url = movie_info[:5]
+        if released_string: 
+            released_at = datetime.strptime(released_string, '%d-%b-%Y') 
+        else: 
+            released_at = None
+
+        title = title[:-7]
+
+        movie = Movie(movie_id=movie_id,
+                    title=title,
+                    released_at=released_at,
+                    imdb_url=imdb_url)
+
+        # We need to add to the session or it won't ever be stored
+        db.session.add(movie)
+
+    # Once we're done, we should commit our work
+    db.session.commit()
+
 
 def load_ratings():
     """Load ratings from u.data into database."""
 
+    print "Ratings"
+
+    # Delete all rows in table, so if we need to run this a second time,
+    # we won't be trying to add duplicate users
+    Rating.query.delete()
+
+    # Read u.data file and insert data
+    for row in open("seed_data/u.data"):
+        row = row.rstrip()
+        rating_info = row.split("\t")
+        user_id, movie_id, score = rating_info[:3]
+
+        rating = Rating(user_id=user_id,
+                    movie_id=movie_id,
+                    score=score)
+
+        # We need to add to the session or it won't ever be stored
+        db.session.add(rating)
+
+    # Once we're done, we should commit our work
+    db.session.commit()
 
 def set_val_user_id():
     """Set value for the next user_id after seeding database"""
