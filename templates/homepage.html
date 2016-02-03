@@ -9,4 +9,28 @@
 <h2>Users</h2>
 <p><a href="/users">View all users</a></p>
 
+<!-- display current logged in user if any user logged in -->
+{% if session_user_id %}
+<p>Currently logged in as {{session_user_id}}<p>
+{% else %}
+<p> Want to log in?</p> 
+{% endif %}
+
+
+<div>
+    <a href="/login">Login</a>
+    <br>
+    <br>
+    <a href="/new-user-signup">Sign up</a>
+    <br>
+    <br>
+    <button onclick="location.href='/logout'">Logout</button>
+
+
+
+
+</div>
+
 {% endblock %}
+
+ 
