@@ -1,0 +1,14 @@
+other_users = all the users who have rated toy story
+
+final_pearson = 0
+
+for O in other_users:
+    pairs = []
+    O_ratings = list of all their ratings
+    for rating.movie_id in O_ratings:
+        if movie_id is in list of User A's ratings:
+            new_pair = (A_score, rating.O_score)
+            pairs.append(new_pair)
+    r = pearson(pairs)
+    if abs(r) > abs(final_pearson[0])
+        final_pearson = r 
