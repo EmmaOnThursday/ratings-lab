@@ -36,7 +36,6 @@ def index():
     return render_template("homepage.html", session_user_id=user_email)
 
 
-
 @app.route('/users')
 def user_list():
     """Show list of users."""
@@ -53,15 +52,7 @@ def user_details(user_id):
     # create instance of user based on user_id from url
     display_user = User.query.get(user_id)
 
-    # retrieve list of all ratings provided by user
-    users_ratings = display_user.ratings
-
-    # build list of title + score for each rating provided by user
-    rated_movies = []
-    for rating in users_ratings:
-        rated_movies.append((rating.movie.title, rating.score)) 
-
-    return render_template('user.html', display_user=display_user, movie_list=rated_movies)
+    return render_template('user.html', display_user=display_user)
 
 
 @app.route('/movies')
@@ -77,18 +68,37 @@ def movie_list():
 def movie_details(movie_id):
     """Show movie details."""
 
-    # instantiate Movie object based movie_id provided by URL
+    # instantiate Movie object based on movie_id provided by URL
     movie = Movie.query.get(movie_id)
 
-    # retrieve list of all ratings for movie
-    movie_ratings = movie.ratings
+    # if user is logged in, create variable from their session user id
+    session_user_id = session.get('user')
 
-    # build list of user + score for each rating
-    ratings = []
-    for rating in movie_ratings:
-        ratings.append((rating.user_id, rating.score))
+    return render_template("movie.html", movie=movie, session_user_id=session_user_id)
 
-    return render_template("movie.html", movie=movie, ratings=ratings)
+
+@app.route('/movies/<int:movie_id>/user-rating', methods=['POST'])
+def display_form(movie_id):
+
+    # extract form info
+    score = request.form.get('score')
+
+    # rating = db.session.query(Rating).filter(Rating.user_id == session['user'], Rating.movie_id == movie_id).first()
+    rating = Rating.query.filter(Rating.user_id == session['user'], Rating.movie_id == movie_id).first()
+    
+    # if user has already submitted a score for this movie, then update DB
+    if rating:
+        rating.score = score
+    # else, add new rating to DB
+    else:
+        rating = Rating(user_id=session['user'], movie_id=movie_id, score=score)
+        db.session.add(rating)
+        
+    db.session.commit()
+
+    flash(("Your rating of {} has been saved!").format(score))
+
+    return redirect(url_for('movie_details', movie_id=movie_id))
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -101,12 +111,13 @@ def login():
         password  = request.form.get('password')
 
         # try to instantiate user based on email & pw provided in form
-        user = db.session.query(User).filter(User.email == email, User.password == password).all()
+        # user = db.session.query(User).filter(User.email == email, User.password == password).all()
+        user = User.query.filter(User.email == email, User.password == password).first()
 
         # if user is created, log them in & redirect to homepage
-        if user != []: 
+        if user: 
             flash('You were successfully logged in')
-            session['user'] = user[0].user_id
+            session['user'] = user.user_id
             return redirect(url_for('index'))
         # if user is not in DB, prompt them to try to log in again
         else: 
@@ -129,7 +140,7 @@ def new_user_signup():
         age = int(request.form.get('age'))
 
         # try to instantiate user based on email from form
-        user = db.session.query(User).filter(User.email == email).all()
+        user = User.query.filter(User.email == email).all()
 
         # if user already in DB, redirect to login page
         if user != []:

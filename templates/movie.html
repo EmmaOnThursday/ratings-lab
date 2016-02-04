@@ -5,18 +5,28 @@
 <p>Release Date: {{ movie.released_at.month }}/{{ movie.released_at.day }}/{{ movie.released_at.year }}</p>
 <p><a href={{ movie.imdb_url }}>View on IMDB</a></p>
 
-
+{% if session_user_id %}
+    <form id="#ratings-form" display='None' method='POST' action='/movies/{{ movie.movie_id }}/user-rating'>
+        <input type='number' name='score' min = "1" max = "5">
+        <input type='submit' value="Save My Rating">
+    </form>
+{% else %}
+    <a href="/login" id="rate-movie">Want to rate this movie? Log in first!</a>
+{% endif %}
+<br>
 
 <table> 
     <tr>
         <th style="text-align:left">User ID</th>
         <th style="text-align:left">Score</th>
     </tr>
-    {% for item in ratings %}
+    {% for item in movie.ratings %}
         <tr>
-            <td><a href="/users/{{ item[0] }}">{{ item[0] }}</a></td>
-            <td>{{ item[1] }}</td>
+            <td><a href="/users/{{ item.user }}">{{ item.user_id }}</a></td>
+            <td>{{ item.score }}</td>
         </tr>
     {% endfor %}
 </table>
 {% endblock%}
+
+
