@@ -1,14 +1,25 @@
+user_a_ratings = list of all ratings given by userA  
+
+m = Movie.query.filter_by(title="Toy Story").one()
+
 other_users = all the users who have rated toy story
 
-final_pearson = 0
+final_pearson = []
 
-for O in other_users:
+for user in other_users:
     pairs = []
-    O_ratings = list of all their ratings
-    for rating.movie_id in O_ratings:
-        if movie_id is in list of User A's ratings:
-            new_pair = (A_score, rating.O_score)
+    user_ratings = list of all their ratings
+    for rating.movie_id in user_ratings:
+        if movie_id is in user_a_ratings:
+            new_pair = (a_score, rating.score)
             pairs.append(new_pair)
     r = pearson(pairs)
-    if abs(r) > abs(final_pearson[0])
-        final_pearson = r 
+    if abs(r) > abs(final_pearson[1])
+        final_pearson[1] = r
+        final_pearson[0] = user
+
+rating = Rating.query.filter(user_id = final_pearson[0], movie_id = m.movie_id).one()
+
+user_A_toy_story_prediction = final_pearson[1] * rating
+
+return user_A_toy_story_prediction

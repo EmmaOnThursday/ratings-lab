@@ -74,7 +74,30 @@ def movie_details(movie_id):
     # if user is logged in, create variable from their session user id
     session_user_id = session.get('user')
 
-    return render_template("movie.html", movie=movie, session_user_id=session_user_id)
+    if session_user_id:
+        user_rating = Rating.query.filter_by(
+            movie_id=movie_id, user_id=session_user_id).first()
+
+    else:
+        user_rating = None
+
+    # Get average rating of movie
+    rating_scores = [r.score for r in movie.ratings]
+    avg_rating = round(float(sum(rating_scores)) / len(rating_scores),1)
+
+    prediction = None
+
+    # Prediction code: only predict if the user hasn't rated it.
+    if (not user_rating) and session_user_id:
+        user = User.query.get(session_user_id)
+        if user:
+            prediction = user.predict_score(movie_id)
+
+    return render_template("movie.html", movie=movie, 
+                    session_user_id=session_user_id, 
+                    user_rating=user_rating, 
+                    prediction=prediction,
+                    avg_rating=avg_rating)
 
 
 @app.route('/movies/<int:movie_id>/user-rating', methods=['POST'])

@@ -15,6 +15,11 @@
 {% endif %}
 <br>
 
+<p>Average rating: {{ avg_rating }}</p>
+{% if prediction %}
+    <p>We predict you will rate this movie {{ prediction }}.</p>
+{% endif %}
+
 <table> 
     <tr>
         <th style="text-align:left">User ID</th>
